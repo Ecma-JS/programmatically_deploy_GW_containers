@@ -14,13 +14,26 @@ router.use(function (req,res,next) {
 router.get('/app', function(req,res){
   console.log(dockerMachineName);
   //res.send('Hello World!');
-  childProcess.execSync('docker-machine create --driver virtualbox --virtualbox-cpu-count -1'+' '+ dockerMachineName.toString());
-  childProcess.execSync('eval $(docker-machine env '+ dockerMachineName.toString() + ')');
-  childProcess.execSync('docker build -t irina/docker-nginx .');
-  childProcess.execSync('docker run docker-nginx');
+  childProcess.exec('docker-machine create --driver virtualbox --virtualbox-cpu-count -1 '+ dockerMachineName, (err, stdout) => {
+    console.log(stdout);
+    const req = 'eval $(docker-machine env ' + dockerMachineName + ')';
+    console.log(req)
+    childProcess.exec(req,  (err, stdout, stderr) => {
+      childProcess.exec('docker-machine active', (err, stdout, stderr) => {
+        console.log(stdout)
+        console.log(stderr)
+        childProcess.exec('docker build -t irina/docker-nginx .', (err, stdout) => {
+          console.log(stdout);
+          childProcess.exec('docker run --publish=80:80 irina/docker-nginx', (err, stdout, stderr) => {
+            dockerMachineName++
+          });
+        });
+      })
 
-  dockerMachineName++
-  console.log(dockerMachineName)
+    });
+  });
+
+
   res.send(dockerMachineName.toString());
 });
 
