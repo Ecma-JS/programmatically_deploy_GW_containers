@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+
+echo 
+
+docker-machine create --driver virtualbox --virtualbox-cpu-count -1 $@
+eval $(docker-machine env $@)
+docker-machine active
+docker build -t irina/docker-nginx .
+docker run --publish=80:80 irina/docker-nginx
+
+echo
+echo
