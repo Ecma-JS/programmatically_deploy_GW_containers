@@ -5,19 +5,25 @@ const childProcess = require('child_process');
 
 const path = __dirname;
 const port = 3000;
-let dockerMachineName = 0;
+let dockerMachineName = -1;
 
 router.use(function (req,res,next) {
   next();
 });
 
 router.get('/app', function(req,res){
-  res.send(dockerMachineName.toString());
+  
+  dockerMachineName++
+  childProcess.exec('docker-machine create --driver virtualbox --virtualbox-cpu-count -1 '+ dockerMachineName, (err, stdout) => {
+    console.log(stdout);
+    childProcess.exec('bash build ' + dockerMachineName, (err, stdout, stderr) => {
+      console.log(stdout)
+      console.log(stderr)
+      childProcess.exec('bash run ' + dockerMachineName)
+    })
+  });
 
-  childProcess.exec('bash script ' + dockerMachineName);
-  
-  dockerMachineName++;
-  
+  res.send(dockerMachineName.toString());
 });
 
 app.use(express.static(path));

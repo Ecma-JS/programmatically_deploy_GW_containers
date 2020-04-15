@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+
+echo 
+
+eval $(docker-machine env $@)
+docker-machine active
+docker build -t irina/docker-nginx .
+
+echo
+echo
