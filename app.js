@@ -18,8 +18,10 @@ router.use(function (req,res,next) {
 
 router.get('/app', async function(req,res){
   const dockerMachineName = 'Vbox'+ count;
+  count++
   res.send(dockerMachineName);
-  const machineDocument = await proxy.connect(dockerMachineName);
+  await proxy.connect();
+  const machineDocument = proxy.create(dockerMachineName);
   console.log(machineDocument);
   await proxy.save(machineDocument);
   const dockerMachine = new DockerMachine(dockerMachineName);
@@ -28,8 +30,6 @@ router.get('/app', async function(req,res){
   const stdoutBuild = await dockerMachine.buildImage();
   await proxy.findAndUpdate(machineDocument, stdoutBuild);
   dockerMachine.runDocker();
-
-  count++
 });
 
 app.use(express.static(path));

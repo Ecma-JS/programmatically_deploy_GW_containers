@@ -15,6 +15,9 @@ const machineProxy = Machine.create('ProxyMachine', {
       },
       'update': function * () {
         yield 'updating';
+      },
+      'create': function () {
+        return 'idle';
       }
     },
     'connecting': {
