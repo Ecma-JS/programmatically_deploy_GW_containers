@@ -4,23 +4,32 @@ const router = express.Router();
 const childProcess = require('child_process');
 const machine = require('./VirtualMachineStent');
 const machineProxy = require('./VirtualProxyStent');
+const VirtualsProxy = require('./virtualsProxy');
+const DockerMachine = require('./dockerMachine');
 
 const path = __dirname;
 const port = 3000;
-let dockerMachineName = 0;
+let count = 0;
+const proxy = new VirtualsProxy();
 
 router.use(function (req,res,next) {
   next();
 });
 
-router.get('/app', function(req,res){
-  
-  machine.state.dockerMachineName = dockerMachineName; 
-  machineProxy.state.payload = dockerMachineName;
-  machine.createDockerMachine();
-  machineProxy.create();
-  dockerMachineName++
-  res.send(dockerMachineName.toString());
+router.get('/app', async function(req,res){
+  const dockerMachineName = 'Vbox'+ count;
+  res.send(dockerMachineName);
+  const machineDocument = await proxy.connect(dockerMachineName);
+  console.log(machineDocument);
+  await proxy.save(machineDocument);
+  const dockerMachine = new DockerMachine(dockerMachineName);
+  const stdoutCreate = await dockerMachine.createMachine();
+  await proxy.findAndUpdate(machineDocument, stdoutCreate);
+  const stdoutBuild = await dockerMachine.buildImage();
+  await proxy.findAndUpdate(machineDocument, stdoutBuild);
+  dockerMachine.runDocker();
+
+  count++
 });
 
 app.use(express.static(path));
