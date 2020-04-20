@@ -23,23 +23,10 @@ router.get('/app', async function(req,res){
   await proxy.connect();
   const dockerMachine = new DockerMachine(dockerMachineName, machine, proxy);
   await dockerMachine.createMachine();
-  while(machine.isError()){
-    machine.state = {name: 'idle'};
-    await dockerMachine.createMachine();
-  }
 
   await dockerMachine.buildImage();
-  while(machine.isError()){
-    machine.state = {name: 'idle'};
-    await dockerMachine.buildImage();
-  }
 
   await dockerMachine.runDocker();
-  while(machine.isError()){
-    machine.state = {name: 'idle'};
-    await dockerMachine.runDocker();
-  }
-
 });
 
 app.use(express.static(path));

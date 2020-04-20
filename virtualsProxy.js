@@ -41,38 +41,27 @@ class VirtualsProxy {
   }
 
   findAndUpdate(machine, data) {
-    machineProxy.update();
-    return new Promise ((res, rej) => {
+    try {
+      machineProxy.update();
       const update = machine.payload.push(data);
-      this.model.findOneAndUpdate(machine.name, {payload: update}, (err, doc) => {
-        if (err) {
-          machineProxy.failed()
-          rej(err)
-        }
-        else {
-          res(doc)
-          machineProxy.success();
-        }
-      })
-    })
-
+      this.model.findOneAndUpdate(machine.name, {payload: update})
+      machineProxy.success();
+    } catch (err) {
+      console.log(err);
+      machineProxy.failed()
+    }
   }
 
-  save (machine) {
-    machineProxy.save();
-    return new Promise ((res, rej) => {
-      machine.save((err) => { 
-        if (err) {
-          machineProxy.failed(); 
-          rej(err)
-        }
-        else {
-          console.log('document create')
-          machineProxy.success();
-          res();
-        }
-      })
-    })
+  async save (machine) {
+    try {
+      machineProxy.save();
+      machine.save();
+      console.log('document create')
+      machineProxy.success();
+    } catch (err) {
+      console.log(err);
+      machineProxy.failed(); 
+    }
   }
 }
 
