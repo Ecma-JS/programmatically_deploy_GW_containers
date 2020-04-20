@@ -1,55 +1,54 @@
-const {Machine} = require('stent')
-const { call } = require ('stent/lib/helpers');
-const childProcess = require('child_process');
+const { Machine } = require('stent')
 
-const machine = Machine.create('DockerMachine', {
-  state: {name: 'idle'},
-  transitions: {
-    'idle': {
-      'createDockerMachine': function * () {
-        yield 'creating';
+const createFSM = (name) => {
+  return Machine.create(name, {
+    state: { name: 'idle' },
+    transitions: {
+      'idle': {
+        'createDockerMachine': function* () {
+          yield 'creating';
+        },
+        'buildImage': function* () {
+          yield 'building';
+          ;
+        },
+        'runDocker': function* () {
+          yield 'running';
+        }
       },
-      'buildImage': function * () {
-        yield 'building';
-;
+      'creating': {
+        'success': function* () {
+          yield 'idle';
+        },
+        'failed': function* () {
+          console.log('failed')
+          yield 'error';
+        }
       },
-      'runDocker': function * () {
-        yield 'running';
-      }
-    },
-    'creating': {
-      'success': function * () {
-        yield 'idle';
+      'building': {
+        'success': function* () {
+          yield 'idle';
+        },
+        'failed': function* () {
+          yield 'error';
+        }
       },
-      'failed': function * () {
-        console.log('failed')
-        yield 'error';
-        machine.error()
-      }
-    },
-    'building': {
-      'success': function * () {
-        yield 'idle';
+      'running': {
+        'success': function* () {
+          yield 'idle'
+        },
+        'failed': function* () {
+          yield 'error'
+        }
       },
-      'failed': function * () {
-        yield 'error';
-      }
-    },
-    'running': {
-      'success': function * () {
-        yield 'idle'
-      },
-      'failed': function * () {
-        yield 'error'
-      }
-    },
-    'error': {
-      'error': function * () {
-        console.log('ERROR');
-        // yield 'idle';
+      'error': {
+        'error': function* () {
+          console.log('ERROR');
+          // yield 'idle';
+        }
       }
     }
-  }
-});
+  });
+}
 
-module.exports = machine;
+module.exports = createFSM;

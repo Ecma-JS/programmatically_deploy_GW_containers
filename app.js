@@ -1,9 +1,7 @@
 const express = require('express');
 const app = express();
 const router = express.Router();
-// const childProcess = require('child_process');
-const machine = require('./VirtualMachineStent');
-// const machineProxy = require('./VirtualProxyStent');
+const createFSM = require('./VirtualMachineStent');
 const VirtualsProxy = require('./virtualsProxy');
 const DockerMachine = require('./dockerMachine');
 
@@ -21,6 +19,7 @@ router.get('/app', async function(req,res){
   count++
   res.send(dockerMachineName);
   await proxy.connect();
+  const machine = createFSM(dockerMachineName);
   const dockerMachine = new DockerMachine(dockerMachineName, machine, proxy);
   await dockerMachine.createMachine();
 

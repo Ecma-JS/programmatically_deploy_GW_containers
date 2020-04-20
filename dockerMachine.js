@@ -13,14 +13,15 @@ class DockerMachine {
     this.machineDocument = this.proxy.create(this.dockerMachineName);
     await this.proxy.save(this.machineDocument);
     this.machine.createDockerMachine();
-    return await new Promise ((res, rej) => {
-      const req = 'docker-machine create --driver virtualbox --virtualbox-cpu-count -1 '+ this.dockerMachineName;
+    return await new Promise (async (res, rej) => {
+      const req = 'docker-machine create --driver virtualbox '+ this.dockerMachineName;
       console.log(req)
       if(count%2 == 0) {
         childProcess.exec(req, 
           async (err, stdout, stderr) => {
              if(err) {
                this.machine.failed()
+               this.machine.state = {name: 'idle'}
                this.createMachine()
              } else {
                console.log(stdout, stderr);
@@ -32,7 +33,7 @@ class DockerMachine {
            })
       } else {
         this.machine.failed()
-        this.createMachine()
+        await this.createMachine()
       }
     })
   }
@@ -41,12 +42,13 @@ class DockerMachine {
     const count = Math.floor(Math.random() * 10);
     console.log('Build image: count = ', count)
     this.machine.buildImage();
-    return await new Promise ((res, rej) => {
+    return await new Promise (async (res, rej) => {
       if(count%2 == 0) {
         childProcess.exec('bash build ' + this.dockerMachineName, async (err, stdout, stderr) => {
           if(err) {
             this.machine.failed()
-            this.buildImage()
+            this.machine.state = {name: 'idle'}
+            await this.buildImage()
           } else {
             console.log(stdout, stderr);
             const response = stdout + stderr;
@@ -67,12 +69,13 @@ class DockerMachine {
     const count = Math.floor(Math.random() * 10);
     console.log('Run Docker: count = ', count)
     this.machine.runDocker();
-    return await new Promise((res, rej) => {
+    return await new Promise(async (res, rej) => {
       if(count%2 == 0) {
-        childProcess.exec('bash run ' + this.dockerMachineName, (err) => {
+        childProcess.exec('bash run ' + this.dockerMachineName, async (err) => {
           if(err) {
             this.machine.failed();
-            this.runDocker()
+            this.machine.state = {name: 'idle'}
+            await this.runDocker()
           } else {
             this.machine.success();
             res();

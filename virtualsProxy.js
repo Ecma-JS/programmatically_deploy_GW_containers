@@ -40,11 +40,11 @@ class VirtualsProxy {
     return new this.model({ name: name, payload:[] });
   }
 
-  findAndUpdate(machine, data) {
+  async findAndUpdate(machine, data) {
     try {
       machineProxy.update();
       const update = machine.payload.push(data);
-      this.model.findOneAndUpdate(machine.name, {payload: update})
+      await this.model.findOneAndUpdate(machine.name, {payload: update})
       machineProxy.success();
     } catch (err) {
       console.log(err);
@@ -55,7 +55,7 @@ class VirtualsProxy {
   async save (machine) {
     try {
       machineProxy.save();
-      machine.save();
+      await machine.save();
       console.log('document create')
       machineProxy.success();
     } catch (err) {
