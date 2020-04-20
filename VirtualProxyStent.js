@@ -1,19 +1,19 @@
-const {Machine} = require('stent')
-const { call } = require ('stent/lib/helpers');
+const { Machine } = require('stent')
+const { call } = require('stent/lib/helpers');
 const mongoose = require('mongoose');
 
 const machineProxy = Machine.create('ProxyMachine', {
-  state: {name: 'idle'},
+  state: { name: 'idle' },
   transitions: {
     'idle': {
-      'connectToMongo': function * () {
+      'connectToMongo': function* () {
         yield 'connecting';
       },
-      'save': function * () {
+      'save': function* () {
         yield 'saving';
-;
+        ;
       },
-      'update': function * () {
+      'update': function* () {
         yield 'updating';
       },
       'create': function () {
@@ -21,31 +21,31 @@ const machineProxy = Machine.create('ProxyMachine', {
       }
     },
     'connecting': {
-      'success': function * () {
+      'success': function* () {
         yield 'idle';
       },
-      'failed': function * () {
+      'failed': function* () {
         yield 'error';
       }
     },
     'saving': {
-      'success': function * () {
+      'success': function* () {
         yield 'idle';
       },
-      'failed': function * () {
+      'failed': function* () {
         yield 'error';
       }
     },
     'updating': {
-      'success': function * () {
+      'success': function* () {
         yield 'idle'
       },
-      'failed': function * () {
+      'failed': function* () {
         yield 'error'
       }
     },
     'error': {
-      'error': function * () {
+      'error': function* () {
         console.log('ERROR');
         yield 'idle';
       }

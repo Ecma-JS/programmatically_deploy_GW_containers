@@ -10,12 +10,12 @@ const port = 3000;
 let count = 0;
 const proxy = new VirtualsProxy();
 
-router.use(function (req,res,next) {
+router.use(function (req, res, next) {
   next();
 });
 
-router.get('/app', async function(req,res){
-  const dockerMachineName = 'Vbox'+ count;
+router.get('/app', async function (req, res) {
+  const dockerMachineName = 'Vbox' + count;
   count++
   res.send(dockerMachineName);
   await proxy.connect();

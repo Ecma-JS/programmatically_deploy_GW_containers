@@ -4,10 +4,10 @@ const machineProxy = require('./VirtualProxyStent');
 const MONGO_URI = 'mongodb+srv://user:q1q1@cluster0-fqcrd.gcp.mongodb.net/test?retryWrites=true&w=majority';
 
 class VirtualsProxy {
-  
-  constructor () {
+
+  constructor() {
     this.schema = mongoose.Schema({
-      name:String,
+      name: String,
       payload: Array
     });
     this.connection = null;
@@ -15,36 +15,37 @@ class VirtualsProxy {
 
   connect() {
     machineProxy.connectToMongo()
-    return new Promise ((res,rej) => { 
+    return new Promise((res, rej) => {
       if (this.connection == null) {
         this.connection = mongoose.connect(MONGO_URI, {
           useUnifiedTopology: true,
           useNewUrlParser: true,
           useFindAndModify: false
-          })
+        })
           .then(() => {
             machineProxy.success();
             console.log('DB Connected!')
             this.model = mongoose.model('Machine', this.schema);
             res();
-          }) .catch(err => {
+          }).catch(err => {
             machineProxy.failed();
             rej(err)
-          console.log('DB Connection Error:', err.message)});
-      }  else res();
+            console.log('DB Connection Error:', err.message)
+          });
+      } else res();
     })
   }
 
   create(name) {
     machineProxy.create();
-    return new this.model({ name: name, payload:[] });
+    return new this.model({ name: name, payload: [] });
   }
 
   async findAndUpdate(machine, data) {
     try {
       machineProxy.update();
       const update = machine.payload.push(data);
-      await this.model.findOneAndUpdate(machine.name, {payload: update})
+      await this.model.findOneAndUpdate(machine.name, { payload: update })
       machineProxy.success();
     } catch (err) {
       console.log(err);
@@ -52,7 +53,7 @@ class VirtualsProxy {
     }
   }
 
-  async save (machine) {
+  async save(machine) {
     try {
       machineProxy.save();
       await machine.save();
@@ -60,7 +61,7 @@ class VirtualsProxy {
       machineProxy.success();
     } catch (err) {
       console.log(err);
-      machineProxy.failed(); 
+      machineProxy.failed();
     }
   }
 }
