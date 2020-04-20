@@ -61,7 +61,7 @@ class DockerMachine {
       } else {
         this.machine.failed()
         this.machine.state = { name: 'idle' }
-        this.buildImage()
+        await this.buildImage()
       }
 
     })
@@ -86,7 +86,7 @@ class DockerMachine {
       } else {
         this.machine.failed()
         this.machine.state = { name: 'idle' }
-        this.runDocker()
+        await this.runDocker()
       }
     })
   }
