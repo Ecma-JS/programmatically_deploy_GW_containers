@@ -4,7 +4,7 @@ echo
 
 eval $(docker-machine env $@)
 docker-machine active
-docker run --publish=80:80 irina/docker-nginx
+docker run -d --publish=80:80 irina/docker-nginx
 
 echo
 echo

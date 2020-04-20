@@ -22,7 +22,9 @@ const machine = Machine.create('DockerMachine', {
         yield 'idle';
       },
       'failed': function * () {
+        console.log('failed')
         yield 'error';
+        machine.error()
       }
     },
     'building': {
@@ -44,7 +46,7 @@ const machine = Machine.create('DockerMachine', {
     'error': {
       'error': function * () {
         console.log('ERROR');
-        yield 'idle';
+        // yield 'idle';
       }
     }
   }

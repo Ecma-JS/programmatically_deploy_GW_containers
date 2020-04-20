@@ -1,9 +1,9 @@
 const express = require('express');
 const app = express();
 const router = express.Router();
-const childProcess = require('child_process');
+// const childProcess = require('child_process');
 const machine = require('./VirtualMachineStent');
-const machineProxy = require('./VirtualProxyStent');
+// const machineProxy = require('./VirtualProxyStent');
 const VirtualsProxy = require('./virtualsProxy');
 const DockerMachine = require('./dockerMachine');
 
@@ -21,15 +21,25 @@ router.get('/app', async function(req,res){
   count++
   res.send(dockerMachineName);
   await proxy.connect();
-  const machineDocument = proxy.create(dockerMachineName);
-  console.log(machineDocument);
-  await proxy.save(machineDocument);
-  const dockerMachine = new DockerMachine(dockerMachineName);
-  const stdoutCreate = await dockerMachine.createMachine();
-  await proxy.findAndUpdate(machineDocument, stdoutCreate);
-  const stdoutBuild = await dockerMachine.buildImage();
-  await proxy.findAndUpdate(machineDocument, stdoutBuild);
-  dockerMachine.runDocker();
+  const dockerMachine = new DockerMachine(dockerMachineName, machine, proxy);
+  await dockerMachine.createMachine();
+  while(machine.isError()){
+    machine.state = {name: 'idle'};
+    await dockerMachine.createMachine();
+  }
+
+  await dockerMachine.buildImage();
+  while(machine.isError()){
+    machine.state = {name: 'idle'};
+    await dockerMachine.buildImage();
+  }
+
+  await dockerMachine.runDocker();
+  while(machine.isError()){
+    machine.state = {name: 'idle'};
+    await dockerMachine.runDocker();
+  }
+
 });
 
 app.use(express.static(path));
